@@ -1,3 +1,5 @@
+// Example of using level triggered epoll instance
+
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/epoll.h>
@@ -14,12 +16,12 @@ int main()
         fprintf(stderr, "Failed to create epoll file descriptor\n");
         return 1;
     }
-
+    int fd_to_inspect = STDIN_FILENO;
     struct epoll_event event;
     event.events = EPOLLIN;
-    event.data.fd = 0;
-    if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, 0, &event))
-    { // adds option specified in event to the epoll instance
+    event.data.fd = fd_to_inspect;
+    if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, fd_to_inspect, &event))
+    {
         fprintf(stderr, "Failed to add file descriptor\n");
         close(epoll_fd);
         return 1;
@@ -28,7 +30,7 @@ int main()
     size_t bytes_read;
     char read_buffer[READ_SIZE + 1]; // for storing data read
     int event_cnt;
-    struct epoll_event events[MAX_EVENTS];
+    struct epoll_event events[MAX_EVENTS]; // buffer to store triggered events
     int running = 1;
     while (running)
     {
